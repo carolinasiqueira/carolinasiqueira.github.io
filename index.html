@@ -1,129 +1,88 @@
 <!DOCTYPE html>
 
-<html lang="pt-br" ng-app>
+<html lang="pt-br">
 	<style type="text/css">
-		body {	background: silver; }
 		
-		#searchuser { width:300px; height:40px; border-radius: 10px; }
+		#cat {width: 140px; height: 40px;}
+		#buscar { width:210px; height:40px; margin-bottom: 20px;}
 		
 	</style>
 
 	<head> 
-		<!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script>
-		<link rel="stylesheet" type="text/css" media="all" href="styles.css">-->
-  		<script type="text/javascript" src="jquery-1.10.2.min.js"></script>
+		<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" />
 
-		<!--<script src="https://api.github.com"></script>-->
+    	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    	<script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular.min.js"></script>
+    	<script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-resource.min.js"></script> 
+    	<script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-route.min.js"></script>
+
+		<link rel="stylesheet" type="text/css" media="all" href="style.css">
+		<script type="text/javascript" src="angular.js"></script>
 	</head>
 
-	<body ng-controller="CtrlSearch">
+	<body ng-app="githubSearch">
+	<div class="container wrapper" ng-controller="MainCtrl">
+
 		<div class="header" align="center">
-			<div id="divLogo">
+			<div class="logoGithub">
 				<img id=imglogo src="github-logo.png"/> 
 			</div>
-			<div id=divBusca>
-				<input type="text" id="searchuser" ng-model="username" placeholder="Buscar usuários ..."/>
-				<a href="" id="submit" ng-click="getUserInfo()">teste</a>
-			</div>
+
+
+			<div class="col-xs-8 col-xs-offset-2">
+				<div class="search">
+					<select ng-model="searchCategory" class="form-control" id="cat" ng-options="cat.name as cat.name for cat in categories"></select>
+					<input type="text" class="form-control" id="buscar" ng-model="searchuser" placeholder="Username ..." on-enter="doSearch()">
+            	</div>
+            </div>
 		</div>
 
-		<div class="load" align="center"></div>
+		<div class="col-xs-12 col-sm-6 col-md-6 text-center project" ng-repeat="result in results | 
+			offset: pconfig.currentPage*pconfig.itemsPerPage | limitTo: pconfig.itemsPerPage">
+            
+            <div class="panel panel-info clearfix">
+                <div class="panel-heading">
+                    <a ng-href="{{result.url}}" class="color-primary" title="Ir para a pagina" target="_blank">
+                        <h4>{{result.title}}</h4>
+                    </a>
+                </div>
+                
+                <div class="panel-body">
+                    <div class="general-description clearfix">
+                        <div class="col-sm-6">
+                            <img ng-src="{{result.owner.avatarUrl}}" />
+                            <a ng-href="{{result.owner.profileUrl}}" title="Ir para perfil" target="_blank">
+                                <span my-truncate="{{result.owner.name}}"></span>
+                            </a>
+                        </div>
+                        
+                        <div class="col-sm-6 text-left">
+                            <div ng-show="result.createdAt">
+                                <span>Created:</span>
+                                <i>{{result.createdAt | date}}</i><br/>
+                            </div>
+                            <div ng-show="result.watchers">
+                                <span>Watchers:</span>
+                                <b>{{result.watchers}}</b><br/>
+                            </div>
+                            <span>Score:</span>
+                            <label class="label label-success">{{result.score | number:2}}</label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-sm-12">
+                        <p>{{result.description}}</p>
+                    </div>
+				</div> <!-- fim div panel body-->
+            </div> <!--fim div panel info-->
+        </div>
+		
 
-		<script type="text/javascript">
-			function CtrlSearch($scope, $http)
-			{
-   				$scope.getUserInfo = function()
-   				{
-   					$scope.userNotFound = false;
-   					$scope.loaded = false;
- 
-   					$http.get("https://api.github.com/users/" + $scope.username)
-   					.success(function (data) 
-   						{
-   							$scope.user = data;
-         					$scope.loaded = true;
-      					}
-      				)
-      				.error(function ()
-      					{
-      						$scope.userNotFound = true;
-      					}
-      				)
-   				}
-			}
-
-			$('#submit').on('click', function(e)
-				{
-					e.preventDefault();
-					$('#load').html('<div id="loader"><img src="loader.gif"></div>');
- 
-    				var username = $('#username').val();
-    				var requri   = 'https://api.github.com/users/'+username;
-    				var repouri  = 'https://api.github.com/users/'+username+'/repos';
-
-    				requestJSON(requri, function(json)
-    					{
-    						if(json.message == "Not Found" || username == '')
-    						{
-    							$('#load').html("<h2>No User Info Found</h2>");
-        					}
- 
-        					else
-        					{
-            					var fullname   = json.name;
-            					var username   = json.login;
-            					var aviurl     = json.avatar_url;
-            					var profileurl = json.html_url;
-            					var location   = json.location;
-            					var followersnum = json.followers;
-            					var followingnum = json.following;
-            					var reposnum     = json.public_repos;
-
-            					if(fullname == undefined)
-            					{ 
-            						fullname = username; 
-            					}
- 
-            					var outhtml = '<h2>'+fullname+' <span class="smallname">(@<a href="'+profileurl+'" target="_blank">'+username+'</a>)</span></h2>';
-            					outhtml = outhtml + '<div class="ghcontent"><div class="avi"><a href="'+profileurl+'" target="_blank"><img src="'+aviurl+'" width="80" height="80" alt="'+username+'"></a></div>';
-            					outhtml = outhtml + '<p>Followers: '+followersnum+' - Following: '+followingnum+'<br>Repos: '+reposnum+'</p></div>';
-            					outhtml = outhtml + '<div class="repolist clearfix">';
-
-            					var repositories;
-        						$.getJSON(repouri, function(json)
-        							{
-        								repositories = json;   
-          								outputPageContent();                
-        							}
-        						); 
-
-        						function outputPageContent()
-        						{
-          							if(repositories.length == 0)
-          							{ 
-          								outhtml = outhtml + '<p>No repos!</p></div>'; 
-          							}
-          							else 
-          							{
-            							outhtml = outhtml + '<p><strong>Repos List:</strong></p> <ul>';
-            							$.each(repositories, function(index) 
-            								{
-              									outhtml = outhtml + '<li><a href="'+ repositories[index].html_url + '"target="_blank">' + repositories[index].name +'</a></li>';
-            								}
-            							);
-            							outhtml = outhtml + '</ul></div>'; 
-          							}
-
-          							$('#load').html(outhtml);
-        						}// fim outputPageContent()
-      						} // sim else
-    					}
-    				); // fim requestJSON Ajax call
-  				}
-  			); // sim click event handler
-
-		</script>
+<div id="pagination" class="text-center"></div>
 
 
+
+	</div>
 	</body>
 </html>
