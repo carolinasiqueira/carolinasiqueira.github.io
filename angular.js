@@ -137,7 +137,8 @@ githubSearch.factory('Github', ['$http', function($http){
             filteredResult.title = result.login;
             filteredResult.description = result.description ||'No description.';
             filteredResult.url = result.html_url;
-            filteredResult.score = result.score;
+            //filteredResult.score = result.score;
+filteredResult.createdAt = result.created_at;
             owner.name = result.type;
             owner.avatarUrl = result.avatar_url;
             owner.profileUrl = result.html_url;
