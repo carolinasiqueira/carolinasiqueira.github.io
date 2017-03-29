@@ -1,3 +1,12 @@
+document.getElementById("ghusername")
+    .addEventListener("keyup", function(event) {
+    event.preventDefault();
+    if (event.keyCode == 13) {
+        document.getElementById("ghsubmitbtn").click();
+    }
+});
+
+
 $(function(){
 
    $('#ghsubmitbtn').on('click', function(e){ 
@@ -31,32 +40,17 @@ $(function(){
         if(fullname == undefined) { fullname = username; }
         
         var outhtml = '<h2>'+fullname+' <span class="smallname">(@<a href="'+profileurl+'" target="_blank">'+username+'</a>)</span></h2>';
-        outhtml = outhtml + '<h2>'+email+'</h2><br></br>'
-        outhtml = outhtml + '<h2>'+bio+'</h2><br></br>'
+        outhtml = outhtml + '<p>E-mail:  '+email+'</p>'
+        outhtml = outhtml + '<p>Data de cadastro no GitHub:  '+created_at +'</p>'
+        outhtml = outhtml + '<p>Biografia:  '+bio+'</p><br></br>'
         outhtml = outhtml + '<div class="ghcontent"><div class="avi"><a href="'+profileurl+'" target="_blank"><img src="'+aviurl+'" width="80" height="80" alt="'+username+'"></a></div>';
-        outhtml = outhtml + '<p>Followers: '+followersnum+' - Following: '+followingnum+'<br>Repos: '+reposnum+'</p></div>';
+        outhtml = outhtml + '<p>Seguidores: '+followersnum+' - Seguindo: '+followingnum+'<br>Quantidade de Repositórios: '+reposnum+'</p></div>';
         outhtml = outhtml + '<div class="repolist clearfix">';
         
-        var repositories;
-        $.getJSON(repouri, function(json){
-          repositories = json;   
-          outputPageContent();                
-        });          
-        
-        function outputPageContent() {
-          if(repositories.length == 0) { outhtml = outhtml + '<p>No repos!</p></div>'; }
-          else {
-            outhtml = outhtml + '<p><strong>Repos List:</strong></p> <ul>';
-            $.each(repositories, function(index) {
-              outhtml = outhtml + '<li><a href="'+repositories[index].html_url+'" target="_blank">'+repositories[index].name + '</a></li>';
-            });
-            outhtml = outhtml + '</ul></div>'; 
-          }
-          $('#ghapidata').html(outhtml);
-        } // end outputPageContent()
-      } // end else statement
-    }); // end requestJSON Ajax call
-  }); // end click event handler
+        $('#ghapidata').html(outhtml);
+      }
+    });
+  });
   
   function requestJSON(url, callback) {
     $.ajax({
